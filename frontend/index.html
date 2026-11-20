@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-Powered Natural Language Turing Machine Simulator - Automata Theory & Tape Visualization Platform">
+  <meta name="application-name" content="AI-Powered Natural Language Turing Machine Simulator">
+  <meta name="theme-color" content="#080b11">
+  <title>Natural Language Turing Machine Simulator | CS Automata Lab</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ======================================================================
+       Header & Navigation Bar
+       ====================================================================== -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="#ffffff" stroke-width="2"/>
+            <line x1="6" y1="5" x2="6" y2="19" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="10" y1="5" x2="10" y2="19" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="14" y1="5" x2="14" y2="19" stroke="#ffffff" stroke-width="1.5"/>
+            <line x1="18" y1="5" x2="18" y2="19" stroke="#ffffff" stroke-width="1.5"/>
+            <polygon points="10,2 14,2 12,5" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>
+            Natural Language Turing Machine Simulator
+            <span class="brand-badge">Formal TM Engine</span>
+          </h1>
+          <div class="brand-subtitle">
+            Natural Language Interpretation &bull; RAG Knowledge Retrieval &bull; Deterministic Tape Simulation
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Backend Health & URL Indicator -->
+        <div class="connection-status" id="connection-status-pill" title="Backend Server Status">
+          <span class="status-dot checking" id="status-dot"></span>
+          <span id="status-text">Checking...</span>
+          <span style="color: var(--border-medium);">&bull;</span>
+          <span id="backend-url-label" class="font-mono" style="font-size: 0.72rem; color: var(--text-dim);">http://127.0.0.1:8000</span>
+          <button type="button" class="btn-icon-subtle" id="btn-settings" title="Configure Backend API URL">
+            Configure URL
+          </button>
+        </div>
+
+        <span class="member-tag">Formal Automata Lab</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================================
+       Main App Layout
+       ====================================================================== -->
+  <main class="app-container">
+
+    <!-- Notification & Clarification Banner -->
+    <div class="alert-banner" id="alert-banner">
+      <div class="alert-icon" id="alert-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <div class="alert-content">
+        <strong id="alert-title">Notification</strong>
+        <span id="alert-message">Welcome to the Turing Machine Simulator.</span>
+      </div>
+      <button type="button" class="alert-close" id="alert-close" aria-label="Close notification">&times;</button>
+    </div>
+
+    <!-- 1. Natural Language Input & Machine Control Panel -->
+    <section class="control-card">
+      <div class="section-title-row">
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Language Specification &amp; Input Parameters
+        </div>
+        <div class="section-hint">
+          Deterministic TM compiler translates natural language into formal states &amp; transitions
+        </div>
+      </div>
+
+      <!-- Clickable Preset Condition Pills -->
+      <div class="presets-bar" id="presets-container">
+        <!-- Dynamically populated by app.js -->
+      </div>
+
+      <!-- Main Input Grid -->
+      <div class="input-grid">
+        <div class="form-group">
+          <label for="condition-input" class="form-label">
+            Natural Language Condition
+            <span class="subtle">English description of the language</span>
+          </label>
+          <textarea 
+            id="condition-input" 
+            class="form-textarea" 
+            placeholder="e.g., The binary string should end with 1."
+            rows="1">The binary string should end with 1.</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="input-string" class="form-label">
+            Test Input String (w)
+            <span class="subtle">Empty string permitted</span>
+          </label>
+          <input 
+            type="text" 
+            id="input-string" 
+            class="form-input font-mono" 
+            placeholder="e.g., 101" 
+            value="101"
+            autocomplete="off"
+            spellcheck="false">
+        </div>
+
+        <div class="form-group">
+          <label for="alphabet-input" class="form-label">
+            Alphabet (Σ)
+            <span class="subtle">Comma-separated</span>
+          </label>
+          <input 
+            type="text" 
+            id="alphabet-input" 
+            class="form-input font-mono" 
+            placeholder="0, 1" 
+            value="0, 1"
+            autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="max-steps-input" class="form-label">
+            Max Steps Guard
+            <span class="subtle">Safety limit</span>
+          </label>
+          <input 
+            type="number" 
+            id="max-steps-input" 
+            class="form-input font-mono" 
+            placeholder="1000" 
+            value="1000"
+            min="10" 
+            max="10000">
+        </div>
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="action-buttons-row">
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary" id="btn-generate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Generate Machine</span>
+          </button>
+
+          <button type="button" class="btn btn-success" id="btn-run">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Run Simulation</span>
+          </button>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-ghost" id="btn-clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Clear</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Turing Machine Tape & Read/Write Head Visualization -->
+    <section class="tape-section-card" id="tape-section">
+      <div class="tape-header-meta">
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+          Turing Machine Tape Visualization
+        </div>
+
+        <!-- Real-Time State & Head Indicators -->
+        <div class="tape-indicators">
+          <div class="indicator-badge state-badge">
+            <span class="label">State</span>
+            <span class="value" id="tape-state-badge">q0</span>
+          </div>
+          <div class="indicator-badge step-badge">
+            <span class="label">Step</span>
+            <span class="value" id="tape-step-badge">0 / 0</span>
+          </div>
+          <div class="indicator-badge">
+            <span class="label">Head</span>
+            <span class="value" id="tape-head-badge">[0]</span>
+          </div>
+          <div class="indicator-badge">
+            <span class="label">Reading</span>
+            <span class="value" id="tape-read-badge">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Horizontal Tape Viewport -->
+      <div class="tape-viewport-container" id="tape-container">
+        <!-- Physical Head Pointer on Top of Track -->
+        <div class="tape-head-marker">
+          <div class="tape-head-label">HEAD : q0</div>
+          <div class="tape-head-arrow"></div>
+        </div>
+
+        <!-- Scrollable Track of Cells -->
+        <div class="tape-track-wrapper">
+          <div class="tape-track">
+            <!-- Dynamically populated with .tape-cell elements by tape.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback & Execution Controls Toolbar -->
+      <div class="tape-controls-toolbar">
+        <div class="playback-buttons">
+          <button type="button" class="btn-ctrl" id="btn-play-pause" title="Play or Pause Trace Animation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Play</span>
+          </button>
+
+          <button type="button" class="btn-ctrl" id="btn-step-prev" title="Step Backward (Previous Configuration)" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+
+          <button type="button" class="btn-ctrl" id="btn-step-next" title="Step Forward (Next Configuration)" disabled>
+            <span>Step</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+
+          <button type="button" class="btn-ctrl" id="btn-reset" title="Reset Tape to Initial Configuration (Step 0)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 4v6h6"></path>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>Reset</span>
+          </button>
+        </div>
+
+        <!-- Step Scrubber Slider -->
+        <div class="scrubber-group">
+          <input 
+            type="range" 
+            class="scrubber-slider" 
+            id="step-scrubber" 
+            min="0" 
+            max="0" 
+            value="0" 
+            disabled 
+            title="Drag to jump to specific step in the trace">
+          <span class="scrubber-label" id="scrubber-label">Step 0 / 0</span>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="speed-control">
+          <label for="speed-select">Speed:</label>
+          <select id="speed-select" class="speed-select">
+            <option value="1000">0.5x (1000ms)</option>
+            <option value="500" selected>1.0x (500ms)</option>
+            <option value="250">2.0x (250ms)</option>
+            <option value="100">5.0x (100ms)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Two-Column Dashboard (Results, Specs, History, RAG) -->
+    <div class="dashboard-grid">
+
+      <!-- Left Column: Simulation Outcome & Formal Machine Specs -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Results Outcome Card -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Simulation Result
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Deterministic Engine Output</span>
+          </div>
+
+          <div id="panel-results">
+            <!-- Dynamically populated by visualization.js -->
+          </div>
+        </div>
+
+        <!-- Machine Information & Formal Specification -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Machine Specification &amp; Transition Rules
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Formal 7-Tuple M = (Q, Σ, Γ, δ, q₀, B, F)</span>
+          </div>
+
+          <div id="panel-machine-info">
+            <!-- Dynamically populated by visualization.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Transition History & RAG Knowledge Base -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Step-by-Step Transition History -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Execution Trace &amp; Transition History
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Click row to jump tape to configuration</span>
+          </div>
+
+          <div id="panel-history">
+            <!-- Dynamically populated by visualization.js -->
+          </div>
+        </div>
+
+        <!-- RAG Knowledge Base References -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              RAG Automata Theory References
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Retrieved from ChromaDB Vector Store</span>
+          </div>
+
+          <div id="panel-rag">
+            <!-- Dynamically populated by visualization.js -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ======================================================================
+       Settings Modal (Configure Backend API URL)
+       ====================================================================== -->
+  <div class="modal-backdrop" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Backend API Configuration</h3>
+        <button type="button" class="btn-icon-subtle" id="btn-close-modal" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          Specify the base endpoint of the Python FastAPI backend server. Changes are persisted in your browser's local storage.
+        </p>
+
+        <div class="form-group">
+          <label for="input-modal-url" class="form-label">
+            Backend Base URL
+            <span class="subtle">Default: http://127.0.0.1:8000</span>
+          </label>
+          <input 
+            type="text" 
+            id="input-modal-url" 
+            class="form-input font-mono" 
+            placeholder="http://127.0.0.1:8000">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-reset-url">Restore Default</button>
+        <button type="button" class="btn btn-primary" id="btn-save-url">Save &amp; Test Connection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       Footer
+       ====================================================================== -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-credits">
+        <strong>Natural Language Turing Machine Simulator</strong> &bull; Formal Automata Simulator
+      </div>
+      <div style="color: var(--text-dim);">
+        Pipeline: Natural Language &rarr; NLP Interpreter &rarr; RAG Retrieval &rarr; TM Construction &rarr; Rule Validation &rarr; TM Simulation
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================================
+       Scripts Loading (Modular Vanilla JS)
+       ====================================================================== -->
+  <script src="js/api.js"></script>
+  <script src="js/tape.js"></script>
+  <script src="js/visualization.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
