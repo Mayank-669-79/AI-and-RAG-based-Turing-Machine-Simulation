@@ -3,7 +3,7 @@
 The integration router is added by Member 6. Until that folder is merged,
 the health endpoint remains available so the base repository can be checked.
 """
-hello bhaiya ganne jka juice dedo
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
