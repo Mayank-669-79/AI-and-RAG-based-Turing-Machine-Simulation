@@ -4,7 +4,12 @@ The integration router is added by Member 6. Until that folder is merged,
 the health endpoint remains available so the base repository can be checked.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from api_integration.routes import router as integration_router
+from api_integration.response_formatter import format_error_response
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -36,12 +41,23 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-# Member 6 should import and register api_integration.routes.router here
-# after that module has been added to the repository.
-try:
-    from api_integration.routes import router as integration_router
-except ImportError:
-    integration_router = None
+@app.exception_handler(RequestValidationError)
+async def request_validation_handler(request: Request, exc: RequestValidationError):
+    errors = [
+        {"location": list(error["loc"]), "message": error["msg"], "type": error["type"]}
+        for error in exc.errors()
+    ]
+    return JSONResponse(status_code=422, content=format_error_response(
+        "INVALID_REQUEST", "Request validation failed.", {"errors": errors}
+    ))
 
-if integration_router is not None:
-    app.include_router(integration_router)
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error_handler(request: Request, exc: StarletteHTTPException):
+    code = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}.get(exc.status_code, "HTTP_ERROR")
+    message = exc.detail if isinstance(exc.detail, str) else "HTTP request failed."
+    return JSONResponse(status_code=exc.status_code, headers=exc.headers,
+                        content=format_error_response(code, message))
+
+
+app.include_router(integration_router)
